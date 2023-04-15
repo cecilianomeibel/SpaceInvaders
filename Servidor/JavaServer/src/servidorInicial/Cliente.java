@@ -1,4 +1,4 @@
-package servidor;
+package servidorInicial;
 
 
 import java.net.*;

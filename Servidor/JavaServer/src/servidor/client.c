@@ -1,61 +1,61 @@
-// Client side C/C++ program to demonstrate Socket
-// programming
 #include <stdio.h>
 #include <winsock2.h>
-#pragma comment(lib, "ws2_32.lib")
-#define PORT 8080
 
-int main(int argc, char const* argv[]) {
-    WSADATA wsa;
-    SOCKET client_fd;
-    struct sockaddr_in serv_addr;
-    char* hello = "Over";
-    char buffer[1024] = { 0 };
-        // Initialize Winsock
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
-        printf("WSAStartup failed. Error Code : %d", WSAGetLastError());
+#pragma comment(lib, "ws2_32.lib") // Enlaza con la biblioteca ws2_32.lib
+
+int main() {
+    WSADATA wsaData;
+    SOCKET sock;
+    struct sockaddr_in server;
+    char message[100];
+    char server_reply[200];
+
+    // Inicializar Winsock
+    if (WSAStartup(MAKEWORD(2,2), &wsaData) != 0) {
+        printf("Error: no se pudo inicializar Winsock\n");
         return 1;
     }
-
-    // Create socket
-    if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
-        printf("Could not create socket : %d", WSAGetLastError());
+    
+    // Crear el socket
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == INVALID_SOCKET) {
+        printf("Error: no se pudo crear el socket\n");
+        return 1;
     }
-
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
-
-    // Convert IPv4 and IPv6 addresses from text to binary
-    // form
-    if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)
-        <= 0) {
-        printf(
-            "\nInvalid address/ Address not supported \n");
-        return -1;
+    
+    // Especificar la dirección del servidor
+    server.sin_addr.s_addr = inet_addr("127.0.0.1"); // Dirección IP del servidor
+    server.sin_family = AF_INET; // Familia de direcciones (IPv4)
+    server.sin_port = htons(8080); // Puerto del servidor
+    
+    // Conectar con el servidor
+    if (connect(sock, (struct sockaddr *)&server, sizeof(server)) < 0) {
+        printf("Error: no se pudo conectar con el servidor\n");
+        return 1;
     }
+    
+    printf("Conexión establecida\n");
 
-    // Connect to server
-    if (connect(client_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
-        printf("\nConnection Failed \n");
-        return -1;
+    // Enviar datos al servidor
+    printf("Ingrese el mensaje: ");
+    fgets(message, 1024, stdin);
+    strcat(message, "\n"); // Agregar una nueva línea al final del mensaje
+    if (send(sock, message, strlen(message), 0) < 0) {
+        printf("Error: no se pudo enviar el mensaje\n");
+        return 1;
     }
+    printf("Mensaje enviado\n");
 
-    // Send message to server
-    send(client_fd, hello, strlen(hello), 0);
-    printf("Hello message sent\n");
-
-    // Receive message from server
-    int valread;
-    if ((valread = recv(client_fd, buffer, 1024, 0)) == SOCKET_ERROR) {
-        printf("recv failed with error code : %d", WSAGetLastError());
+    // Recibir datos del servidor
+    if (recv(sock, server_reply, 200, 0) < 0) {
+        printf("Error: no se pudo recibir la respuesta del servidor\n");
+        return 1;
     }
-    printf("%s\n", buffer);
+    printf("Respuesta del servidor: %s\n", server_reply);
 
-    // closing the connected socket
-    closesocket(client_fd);
-
-    // Cleanup Winsock
+    // Cerrar el socket
+    closesocket(sock);
     WSACleanup();
-
+    
     return 0;
 }
