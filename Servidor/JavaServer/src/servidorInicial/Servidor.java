@@ -1,5 +1,5 @@
 //Paquete Servidor
-package servidor;
+package servidorInicial;
 
 import java.net.*;
 import java.io.*;
