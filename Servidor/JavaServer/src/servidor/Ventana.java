@@ -121,6 +121,7 @@ public class Ventana {
         panelVentana.add(empezarButton);
         empezarButton.setBounds(350, 335, 180, 30);
         panelVentana.setLayout(null);
+        panelVentana.setBackground(Color.LIGHT_GRAY);
 
     }
 
@@ -136,4 +137,4 @@ public class Ventana {
 
     }
 
-
+}
